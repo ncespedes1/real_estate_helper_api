@@ -35,7 +35,7 @@ class Users(Base):
     last_name: Mapped[str] = mapped_column(String(360), nullable=False)
     email: Mapped[str] = mapped_column(String(360), nullable=False, unique=True)
     password: Mapped[str] = mapped_column(String(500), nullable=False)
-    role: Mapped[str] = mapped_column(String(360), nullable=False)
+    role: Mapped[str] = mapped_column(String(360), nullable=False, default="free_user")
 
     county_data: Mapped[list['County_data']] = relationship('County_data', secondary='compare_counties', back_populates='users')
 

@@ -38,7 +38,7 @@ def create_user():
     
     data['password']= generate_password_hash(data['password'])
 
-    user = db.session.query(Users).filter_by(Users.email == data['email']).first()
+    user = db.session.query(Users).where(Users.email == data['email']).first()
 
     if user: 
         return jsonify({'error': 'Email already taken'}), 400
@@ -73,7 +73,7 @@ def get_user(user_id):
 
 # Update Profile
 
-@users_bp.route('/<int:user_id>', methods=['PUT'])
+@users_bp.route('', methods=['PUT'])
 @token_required
 def update_user():
     user_id= request.user_id
@@ -93,7 +93,7 @@ def update_user():
     data['password'] = generate_password_hash(data['password'])
 
     existing = db.session.query(Users).where(Users.email == data['email']).first()
-    if existing:
+    if existing and existing.id != user_id:
         return jsonify({"error": "Email already taken."})
 
     db.session.commit()

@@ -1,0 +1,59 @@
+swagger: '2.0'
+info:
+  title: "Real Estate Helper API"
+  description: "This is an API to help access United States real estate county data and compare patterns over the years"
+  version: "1.0.0"
+host: "my-real-estate-helper.onrender.com" #changed from local 
+schemes:
+  - "https"
+consumes:
+  - "application/json"
+produces:
+  - "application/json"
+
+securityDefinitions: #Describing how to add token auth to the endpoints
+  bearerAuth:
+    type: apiKey #double check this later
+    name: Authorization
+    in: header
+
+
+
+paths: 
+  /mechanics/login:
+    post:
+      tags:
+        - Users
+      summary: "Login endpoint and generates token"
+      description: "Validates User credentials (email and password), and creates a user specific token."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "Login Credentials"
+          required: true
+          schema:
+            $ref: "#/definitions/LoginCredentials"
+      responses:
+        200:
+          description: "Login Successful"
+          schema:
+            $ref: "#/definitions/LoginSuccessResponse"
+          examples:
+            application/json:
+              message: "Welcome User"
+              token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOj..."
+              user: 
+                id: 0
+                firstname: "Test"
+                lastname: "Mech"
+                email: "test@email.com"
+                password: "<encrypted password>"
+                role: "User"
+
+        401:
+          description: "Login Failed"
+          schema:
+            $ref: "#/definitions/LoginFailResponse"
+          examples:
+            application/json:
+              message: "Failed to find User credentials"
