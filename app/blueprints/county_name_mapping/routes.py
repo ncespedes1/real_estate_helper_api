@@ -1,29 +1,37 @@
-from flask import request, jsonify
+from flask import request, jsonify, Flask, render_template, redirect, url_for
 from app.models import County_name_mapping, db
 from .schemas import county_name_mapping_schema, county_name_mappings_schema
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import county_name_mapping_bp
+import pandas as pd
+import io
 
 
 
-# Register/Create Location
-# @locations_bp.route('', methods=['POST'])
-# def create_location():
+# Create County_name_mapping by uploading csv file
+@county_name_mapping_bp.route('/upload', methods=['POST'])
+def upload_county_name_mapping():
 
-#     try:
-#         data = location_schema.load(request.json)
-#     except ValidationError as e:
-#         return jsonify(e.messages), 400
+    if 'file' not in request.files:
+        return jsonify({'error': 'no file found'}), 400
     
-#     new_location = Location(**data)
-#     db.session.add(new_location)
-#     db.session.commit()
+    file = request.files['file']
 
-#     return jsonify({
-#         'message': 'Successfully created location',
-#         'location': location_schema.dump(new_location)
-#     })
+    if file:
+        dataframe = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")), sep=',', header=0, usecols=['county_fips', 'county_name'], dtype={'county_fips': str})
+
+        for row in dataframe.itertuples(index=False):
+            new_county_name_mapping = County_name_mapping(fips_id= row.county_fips, county_name= row.county_name)
+            db.session.add(new_county_name_mapping)
+            print(f"Fips: {row.county_fips}, Name: {row.county_name}")
+
+        db.session.commit()
+
+    return jsonify({
+        'message': 'Successfully created county_name_mapping'
+        # 'county_name_mapping': county_name_mapping_schema.dump(new_county_name_mapping)
+    }),200
 
 
 

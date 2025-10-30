@@ -49,8 +49,8 @@ class County_data(Base):
     active_listing_count: Mapped[int] = mapped_column(nullable=False)
     active_listing_count_yy: Mapped[float] = mapped_column(nullable=False)
     median_days_on_market: Mapped[int] = mapped_column(nullable=False)
-    price_reduced_count: Mapped[int] = mapped_column(nullable=False)
-    # pending_listing_count: Mapped[int] = mapped_column(nullable=False)?
+    price_reduced_count: Mapped[int] = mapped_column(Integer, nullable=False)
+    pending_listing_count: Mapped[int] = mapped_column(Integer, nullable=False)
 
     users: Mapped[list['Users']] = relationship('Users', secondary='compare_counties', back_populates='county_data')
     county_name_mapping: Mapped['County_name_mapping'] = relationship('County_name_mapping', back_populates='counties_data')
