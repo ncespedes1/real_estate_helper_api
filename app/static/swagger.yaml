@@ -3,7 +3,7 @@ info:
   title: "Real Estate Helper API"
   description: "This is an API to help access United States real estate county data and compare patterns over the years"
   version: "1.0.0"
-host: "my-real-estate-helper.onrender.com" #changed from local 
+host: "localhost:5000" #"my-real-estate-helper.onrender.com"
 schemes:
   - "https"
 consumes:
@@ -11,16 +11,16 @@ consumes:
 produces:
   - "application/json"
 
-securityDefinitions: #Describing how to add token auth to the endpoints
+securityDefinitions:
   bearerAuth:
-    type: apiKey #double check this later
+    type: apiKey
     name: Authorization
     in: header
 
 
 
 paths: 
-  /mechanics/login:
+  /users/login:
     post:
       tags:
         - Users
@@ -44,11 +44,11 @@ paths:
               token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOj..."
               user: 
                 id: 0
-                firstname: "Test"
-                lastname: "Mech"
-                email: "test@email.com"
+                first_name: "New"
+                last_name: "Guy"
+                email: "newguy@email.com"
                 password: "<encrypted password>"
-                role: "User"
+                role: "free_user"
 
         401:
           description: "Login Failed"
@@ -57,3 +57,217 @@ paths:
           examples:
             application/json:
               message: "Failed to find User credentials"
+  
+  /users:
+    post:
+      tags:
+        - Users
+      summary: "Create User"
+      description: "Send in User info, to create a User profile that will be stored in the database."
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "New User information"
+          required: true
+          schema:
+            $ref: "#/definitions/UserInput"
+
+      responses:
+        201:
+          description: "Creation Successful"
+          schema:
+            $ref: "#/definitions/UserResponse"
+          examples:
+            application/json:
+              id: 0
+              first_name: "New"
+              last_name: "Guy"
+              email: "newguy@email.com"
+              password: "<encrypted password>"
+              role: "free_user"
+
+    get:
+      tags:
+        - Users
+      summary: "Gets a User Profile"
+      description: "View User's profile. Requires a token. User will be identified by token."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "User View Profile"
+          required: true
+          schema:
+            $ref: "#/definitions/UserInput"
+      
+      responses:
+        200:
+          description: "Successfully retrieved User profile."
+          schema:
+            $ref: "#/definitions/UserResponse"
+          examples:
+            application/json:
+              id: 0
+              first_name: "New"
+              last_name: "Guy"
+              email: "newguy@email.com"
+              password: "<encrypted password>"
+              role: "free_user"
+              
+    put:
+      tags:
+        - Users
+      summary: "Updates a User"
+      description: "Endpoint to update a User profile. Requires a token. User will be identified by token."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: "body"
+          name: "body"
+          description: "User Updates"
+          required: true
+          schema:
+            $ref: "#/definitions/UserInput"
+      
+      responses:
+        200:
+          description: "Successfully updated User profile."
+          schema:
+            $ref: "#/definitions/UserResponse"
+          examples:
+            application/json:
+              id: 0
+              first_name: "New"
+              last_name: "Guy"
+              email: "newguy@email.com"
+              password: "<encrypted password>"
+              role: "free_user"
+
+    delete:
+      tags:
+        - Users
+      summary: "Deletes a User"
+      description: "Deletes a User object. Requires a token. Token will be used to identify User to delete."
+      security:
+        - bearerAuth: []
+
+      responses:
+        200:
+          description: "Successfully deleted User profile."
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+
+  /users/view_compare_counties:
+    get:
+      tags:
+        - Users
+      summary: "Returns all Compare_counties assigned to User"
+      description: "Endpoint to receive an array of Compare_county objects assigned to User. Token is required to identify User."
+      responses:
+        200:
+          description: "Successfully Retrieved User's Compare_counties"
+          schema:
+            $ref: "#/definitions/CompareCountyListResponse"
+
+
+definitions: 
+
+#-------------------User Login---------------
+  LoginCredentials: #Input data required for login route
+    type: object
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+
+    required:
+      - email
+      - password
+
+  LoginSuccessResponse: #Response from login endpoint
+    type: object
+    properties:
+      message:
+        type: string
+      token:
+        type: string
+      mechanic:
+       $ref: '#/definitions/UserResponse'
+
+  LoginFailResponse:
+    type: object
+    properties:
+      message:
+        type: string
+
+# -------------------
+
+#-------------------User Input---------------
+
+  UserInput: #Sending user Information
+    type: object
+    properties:
+      first_name:
+        type: string
+        example: "New"
+      last_name:
+        type: string
+        example: "Guy"
+      email:
+        type: string
+        example: "newguy@email.com"
+      password:
+        type: string
+        example: "bestguy"
+      role:
+        type: string
+        example: "free_user" 
+
+      
+    required:
+      - first_name
+      - last_name
+      - email
+      - password
+    
+  UserResponse: 
+    type: object
+    properties:
+      id:
+        type: integer
+      first_name:
+        type: string
+      last_name:
+        type: string
+      email:
+        type: string
+      password:
+        type: string
+      role:
+        type: string
+
+
+  UsersResponse: 
+    type: array
+    items:
+      type: object
+      properties:
+        id:
+          type: integer
+        first_name:
+          type: string
+        last_name:
+          type: string
+        email:
+          type: string
+        password:
+          type: string
+        role:
+          type: string
+
+#--------------------
