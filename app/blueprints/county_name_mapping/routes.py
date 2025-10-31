@@ -9,7 +9,7 @@ import io
 
 
 
-# Create County_name_mapping by uploading csv file
+# Create County_name_mapping (multiple) by uploading csv file
 @county_name_mapping_bp.route('/upload', methods=['POST'])
 def upload_county_name_mapping():
 
@@ -19,14 +19,19 @@ def upload_county_name_mapping():
     file = request.files['file']
 
     if file:
-        dataframe = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")), sep=',', header=0, usecols=['county_fips', 'county_name'], dtype={'county_fips': str})
+        try:
 
-        for row in dataframe.itertuples(index=False):
-            new_county_name_mapping = County_name_mapping(fips_id= row.county_fips, county_name= row.county_name)
-            db.session.add(new_county_name_mapping)
-            print(f"Fips: {row.county_fips}, Name: {row.county_name}")
+            dataframe = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")), sep=',', header=0, usecols=['county_fips', 'county_name'], dtype={'county_fips': str})
 
-        db.session.commit()
+            for row in dataframe.itertuples(index=False):
+                new_county_name_mapping = County_name_mapping(fips_id= row.county_fips, county_name= row.county_name)
+                db.session.add(new_county_name_mapping)
+                print(f"Fips: {row.county_fips}, Name: {row.county_name}")
+
+            db.session.commit()
+        
+        except Exception as e:
+            return jsonify(e.messages), 400
 
     return jsonify({
         'message': 'Successfully created county_name_mapping'
@@ -45,7 +50,7 @@ def upload_county_name_mapping():
 #     return jsonify ({'error': 'Invalid fips id'})
 
 
-# start the page with this, then allow user to pick from closest 5 
+# start the page with this, then frontend- allow user to autofill closest 5 
 # View counties_mapping
 @county_name_mapping_bp.route('', methods=['GET'])
 def get_county_name_mappings():

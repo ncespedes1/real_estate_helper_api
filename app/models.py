@@ -13,7 +13,7 @@ compare_counties = Table(
     'compare_counties',
     Base.metadata,
     Column('user_id', Integer, ForeignKey('users.id')),
-    Column('fips_id', String, ForeignKey('county_data.fips_id'))
+    Column('fips_id', String, ForeignKey('county_name_mapping.fips_id'))
 )
 
 # class Compare_county(Base):
@@ -37,7 +37,7 @@ class Users(Base):
     password: Mapped[str] = mapped_column(String(500), nullable=False)
     role: Mapped[str] = mapped_column(String(360), nullable=False, default="free_user")
 
-    county_data: Mapped[list['County_data']] = relationship('County_data', secondary='compare_counties', back_populates='users')
+    county_compare_list: Mapped[list['County_name_mapping']] = relationship('County_name_mapping', secondary='compare_counties', back_populates='users')
 
 
 class County_data(Base):
@@ -52,7 +52,6 @@ class County_data(Base):
     price_reduced_count: Mapped[int] = mapped_column(Integer, nullable=False)
     pending_listing_count: Mapped[int] = mapped_column(Integer, nullable=False)
 
-    users: Mapped[list['Users']] = relationship('Users', secondary='compare_counties', back_populates='county_data')
     county_name_mapping: Mapped['County_name_mapping'] = relationship('County_name_mapping', back_populates='counties_data')
 
 
@@ -64,4 +63,5 @@ class County_name_mapping(Base):
     county_name: Mapped[str] = mapped_column(String(360), nullable=False)
 
     counties_data: Mapped[list['County_data']] = relationship('County_data', back_populates='county_name_mapping')
-    
+    users: Mapped[list['Users']] = relationship('Users', secondary='compare_counties', back_populates='county_compare_list')
+

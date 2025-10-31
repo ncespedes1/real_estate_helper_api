@@ -9,7 +9,7 @@ import pandas as pd
 import io
 
 
-# Create county_data multiple by uploading csv file
+# Create county_data (historical multiple) by uploading csv file
 @county_data_bp.route('/upload', methods=['POST'])
 def upload_county_data():
 
@@ -19,41 +19,44 @@ def upload_county_data():
     file = request.files['file']
 
     if file:
-        dataframe = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")), sep=',', header=0, usecols=[
-            'month_date_yyyymm', 
-            'county_fips', 
-            'median_listing_price', 
-            'active_listing_count', 
-            'active_listing_count_yy', 
-            'median_days_on_market', 
-            'price_reduced_count', 
-            'pending_listing_count'], 
-            dtype={'month_date_yyyymm':str,'county_fips': str, 'active_listing_county_yy': float})
-        
-        dataframe = dataframe.fillna(0) #'Nan' data will register as 0
-
-        for row in dataframe.itertuples(index=False):
-            if row.county_fips is None:
-                continue
-            county_date= datetime.strptime(row.month_date_yyyymm + "01", '%Y%m%d')
-
+        try:
+            dataframe = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")), sep=',', header=0, usecols=[
+                'month_date_yyyymm', 
+                'county_fips', 
+                'median_listing_price', 
+                'active_listing_count', 
+                'active_listing_count_yy', 
+                'median_days_on_market', 
+                'price_reduced_count', 
+                'pending_listing_count'], 
+                dtype={'month_date_yyyymm':str,'county_fips': str, 'active_listing_county_yy': float})
             
-            new_county_data = County_data(
-                info_date= county_date, 
-                fips_id= row.county_fips,
-                median_listing_price= row.median_listing_price,
-                active_listing_count= row.active_listing_count,
-                active_listing_count_yy= row.active_listing_count_yy,
-                median_days_on_market= row.median_days_on_market,
-                price_reduced_count= row.price_reduced_count,
-                pending_listing_count= row.pending_listing_count 
-                )
-            
-            db.session.add(new_county_data)
-            print(f"Fips: {row.county_fips}, Median_listing_price: {row.median_listing_price}, Median_days_on_market: {row.median_days_on_market}")
+            dataframe = dataframe.fillna(0) #'Nan' data will register as 0
 
-        db.session.commit()
+            for row in dataframe.itertuples(index=False):
+                if row.county_fips is None:
+                    continue
+                county_date= datetime.strptime(row.month_date_yyyymm + "01", '%Y%m%d')
 
+                
+                new_county_data = County_data(
+                    info_date= county_date, 
+                    fips_id= row.county_fips,
+                    median_listing_price= row.median_listing_price,
+                    active_listing_count= row.active_listing_count,
+                    active_listing_count_yy= row.active_listing_count_yy,
+                    median_days_on_market= row.median_days_on_market,
+                    price_reduced_count= row.price_reduced_count,
+                    pending_listing_count= row.pending_listing_count 
+                    )
+                
+                db.session.add(new_county_data)
+                print(f"Fips: {row.county_fips}, Median_listing_price: {row.median_listing_price}, Median_days_on_market: {row.median_days_on_market}")
+
+            db.session.commit()
+
+        except Exception as e:
+            return jsonify(e.messages), 400
 
     return jsonify({
         'message': 'Successfully created county_data'
@@ -62,13 +65,13 @@ def upload_county_data():
 
 
 
-# View Profile
+# View county data (multiple) by fips_id
 @county_data_bp.route('/<fips_id>', methods=['GET'])
 def get_county_data(fips_id):
-    county_data = db.session.get(County_data, fips_id)
+    county_data = db.session.query(County_data).where(County_data.fips_id == fips_id).all()
     if county_data:
-        return county_data_schema.jsonify(county_data), 200
-    return jsonify ({'error': 'Invalid fips id'})
+        return counties_data_schema.jsonify(county_data), 200
+    return jsonify({'error': 'Invalid fips id'}), 400
 
 
 # View All locations

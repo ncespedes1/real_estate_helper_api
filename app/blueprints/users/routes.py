@@ -1,5 +1,5 @@
 from flask import request, jsonify
-from app.models import Users, db
+from app.models import Users, County_name_mapping, db
 from .schemas import user_schema, users_schema, login_schema
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -24,7 +24,7 @@ def login():
             'user': user_schema.dump(user)
         }), 200
     
-    return jsonify({'error': 'invalid email or password'})
+    return jsonify({'error': 'invalid email or password'}), 401
 
 
 # Register/Create Users
@@ -56,12 +56,14 @@ def create_user():
 
 
 # View Profile
-@users_bp.route('/<int:user_id>', methods=['GET'])
-def get_user(user_id):
+@users_bp.route('', methods=['GET'])
+@token_required
+def get_user():
+    user_id= request.user_id
     user = db.session.get(Users, user_id)
     if user:
         return user_schema.jsonify(user), 200
-    return jsonify ({'error': 'Invalid user id'})
+    return jsonify ({'error': 'Invalid user id'}), 400
 
 
 # View All users
@@ -72,7 +74,6 @@ def get_user(user_id):
 
 
 # Update Profile
-
 @users_bp.route('', methods=['PUT'])
 @token_required
 def update_user():
@@ -94,7 +95,7 @@ def update_user():
 
     existing = db.session.query(Users).where(Users.email == data['email']).first()
     if existing and existing.id != user_id:
-        return jsonify({"error": "Email already taken."})
+        return jsonify({"error": "Email already taken."}), 400
 
     db.session.commit()
     return jsonify({
@@ -104,7 +105,7 @@ def update_user():
 
 
 # Delete Profile
-@users_bp.route('/<int:user_id>', methods=['DELETE'])
+@users_bp.route('', methods=['DELETE'])
 @token_required
 def delete_user():
     user_id= request.user_id
@@ -114,3 +115,31 @@ def delete_user():
         db.session.commit()
         return jsonify({'message': 'Successfully deleted user'}), 200
     return jsonify({'error': 'Invalid user id'}), 400
+
+
+#Assign compared counties
+@users_bp.route('/assign_compare_county/<county_fips>', methods=['PUT'])
+@token_required
+def assign_compare_county(county_fips):
+    user_id= request.user_id
+    user = db.session.get(Users, user_id)
+    county_name_map = db.session.get(County_name_mapping, county_fips)
+
+    if not user:
+        return jsonify({'message': 'User not found'}), 404
+    if not county_name_map:
+        return jsonify({'message': 'County_name_mapping not found. Check fips_id.'}), 404
+    if len(user.county_compare_list) >= 3:
+        return ({'message': 'Maximum comparable County_data reached'}), 400
+
+    for county in user.county_compare_list:
+        if county_fips == county.fips_id:
+            return ({'message': 'County_data already assigned to this user'}), 400
+            
+    user.county_compare_list.append(county_name_map)
+    db.session.commit()
+
+    return jsonify({'message': 'Successfully added a compare_county'}), 200
+
+        
+#delete compare county
