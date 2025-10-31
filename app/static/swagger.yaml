@@ -161,17 +161,61 @@ paths:
               message:
                 type: string
 
+
   /users/view_compare_counties:
     get:
       tags:
-        - Users
-      summary: "Returns all Compare_counties assigned to User"
-      description: "Endpoint to receive an array of Compare_county objects assigned to User. Token is required to identify User."
+        - Compare_county
+      summary: "Returns all counties assigned to User"
+      description: "Endpoint to receive an array of counties assigned to User. Token is required to identify User."
       responses:
         200:
-          description: "Successfully Retrieved User's Compare_counties"
+          description: "Successfully Retrieved User's compare counties list"
           schema:
             $ref: "#/definitions/CompareCountyListResponse"
+
+  /users/assign_compare_county/{county_fips}:
+      post:
+        tags:
+          - Compare_county
+        summary: "Adds a Compare_county to User's county compare list"
+        description: "Endpoint to add a Compare_county object assigned to User. Token is required to identify User."
+        parameters:
+        - in: path
+          name: county_fips
+          description: "New compare_county information"
+          required: true
+          schema:
+            $ref: "#/definitions/Compare_CountyInput"
+        responses:
+          200:
+            description: "Successfully added a Compare_county"
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+
+  /users/remove_compare_county/{county_fips}:
+      delete:
+      tags:
+        - Compare_county
+      summary: "Removes a Compare_county from User's county compare list"
+      description: "Removes a Compare_county object. Token is required to identify User. Requires a county_fips id to identify which compare_county to remove."
+      parameters:
+        - in: path
+          name: county_fips
+          required: true
+          type: string
+          description: Fips ID of the compare_county to delete
+      responses:
+        200:
+          description: "Successfully removed a Compare_county."
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
 
 
 definitions: 
@@ -271,3 +315,22 @@ definitions:
           type: string
 
 #--------------------
+
+
+#-------------------Compare County List Response---------------
+
+  CompareCountyListResponse:
+    type: array
+    items: 
+      type: object
+      properties:
+        fips_id:
+          type: string
+          example: "12345"
+        county_name:
+          type: string
+          example: "county_name"
+       
+# -------------------
+
+#-------------------Add Compare_county---------------
