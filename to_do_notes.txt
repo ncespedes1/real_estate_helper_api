@@ -1,7 +1,7 @@
 
 Under Users:
-delete assign compare county
-get compare county list
+x delete assign compare county
+x get compare county list
 
 ---------------
 lesser priority:

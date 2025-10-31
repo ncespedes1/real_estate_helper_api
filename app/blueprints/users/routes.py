@@ -1,12 +1,13 @@
 from flask import request, jsonify
 from app.models import Users, County_name_mapping, db
 from .schemas import user_schema, users_schema, login_schema
+from app.blueprints.county_name_mapping.schemas import county_name_mappings_schema
 from marshmallow import ValidationError
 from werkzeug.security import generate_password_hash, check_password_hash
 from . import users_bp
 from app.util.auth import encode_token, token_required
 
-#Login
+#Login and get token
 @users_bp.route('/login', methods=['POST'])
 def login():
     try:
@@ -55,7 +56,7 @@ def create_user():
 
 
 
-# View Profile
+# View User Profile
 @users_bp.route('', methods=['GET'])
 @token_required
 def get_user():
@@ -117,6 +118,7 @@ def delete_user():
     return jsonify({'error': 'Invalid user id'}), 400
 
 
+
 #Assign compared counties
 @users_bp.route('/assign_compare_county/<county_fips>', methods=['PUT'])
 @token_required
@@ -142,4 +144,27 @@ def assign_compare_county(county_fips):
     return jsonify({'message': 'Successfully added a compare_county'}), 200
 
         
-#delete compare county
+#Delete compare county
+@users_bp.route('/remove_compare_county/<county_fips>', methods=['DELETE'])
+@token_required
+def remove_compare_county(county_fips):
+    user_id= request.user_id
+    user = db.session.get(Users, user_id)
+    
+    for county in user.county_compare_list:
+        if county_fips == county.fips_id:
+            user.county_compare_list.remove(county)
+            db.session.commit()
+            return jsonify({'message': 'Successfully removed a compare_county'}), 200
+        
+    return jsonify({'message': 'County_name_mapping not found. Check fips_id.'}), 404
+
+
+#View compare county list
+@users_bp.route('/view_compare_counties', methods=['GET'])
+@token_required
+def view_compare_counties():
+    user_id= request.user_id
+    user = db.session.get(Users, user_id)
+
+    return county_name_mappings_schema.jsonify(user.county_compare_list), 200
