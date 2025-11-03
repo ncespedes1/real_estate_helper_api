@@ -65,7 +65,7 @@ def upload_county_data():
 
 
 
-# View county data (multiple) by fips_id
+# View county data (multiple dates) by fips_id
 @county_data_bp.route('/<fips_id>', methods=['GET'])
 def get_county_data(fips_id):
     county_data = db.session.query(County_data).where(County_data.fips_id == fips_id).all()

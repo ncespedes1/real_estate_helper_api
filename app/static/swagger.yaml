@@ -3,7 +3,7 @@ info:
   title: "Real Estate Helper API"
   description: "This is an API to help access United States real estate county data and compare patterns over the years"
   version: "1.0.0"
-host: "localhost:5000" #"my-real-estate-helper.onrender.com"
+host: "127.0.0.1:5000" #"my-real-estate-helper.onrender.com"
 schemes:
   - "https"
 consumes:
@@ -172,7 +172,7 @@ paths:
         200:
           description: "Successfully Retrieved User's compare counties list"
           schema:
-            $ref: "#/definitions/CompareCountyListResponse"
+            $ref: "#/definitions/CountyNameMappingResponse"
 
   /users/assign_compare_county/{county_fips}:
       post:
@@ -198,24 +198,104 @@ paths:
 
   /users/remove_compare_county/{county_fips}:
       delete:
+        tags:
+          - Compare_county
+        summary: "Removes a Compare_county from User's county compare list"
+        description: "Removes a Compare_county object. Token is required to identify User. Requires a county_fips id to identify which compare_county to remove."
+        parameters:
+          - in: path
+            name: county_fips
+            required: true
+            type: string
+            description: Fips ID of the compare_county to delete
+        responses:
+          200:
+            description: "Successfully removed a Compare_county."
+            schema:
+              type: object
+              properties:
+                message:
+                  type: string
+
+
+
+  /county_data/upload:
+    post:
       tags:
-        - Compare_county
-      summary: "Removes a Compare_county from User's county compare list"
-      description: "Removes a Compare_county object. Token is required to identify User. Requires a county_fips id to identify which compare_county to remove."
+        - County_data
+      summary: "Creates the historical county_data by uploading csv file"
+      description: "Creates county_data objects based on the data from the historical csv file."
       parameters:
-        - in: path
-          name: county_fips
+        - in: formData
+          name: file
+          type: file
+          description: "RDC_Inventory_Core_Metrics_County_History.csv"
           required: true
-          type: string
-          description: Fips ID of the compare_county to delete
+      
       responses:
         200:
-          description: "Successfully removed a Compare_county."
+          description: "Successfully created county_data"
           schema:
             type: object
             properties:
               message:
                 type: string
+
+  
+  /county_data/{fips_id}:
+    get:
+      tags:
+        - County_data
+      summary: "Gets all county_data by using fips_id"
+      description: "Gets an array of county_data objects based on the fips_id."
+      parameters:
+        - in: path
+          name: fips_id
+          description: "County fips id"
+          required: true
+          
+      responses:
+        200:
+          description: "Successfully Retrieved all historical county_data for county matching the fips id."
+          schema:
+            $ref: "#/definitions/CountyDataResponse"
+
+
+  /county_name_mapping/upload:
+    post:
+      tags:
+        - County_name_mapping
+      summary: "Creates the county_name_mapping by uploading csv file"
+      description: "Creates county_name_mapping objects based on the data from a csv file."
+      parameters:
+        - in: formData
+          name: file
+          type: file
+          description: "RDC_Inventory_Core_Metrics_County.csv"
+          required: true
+      
+      responses:
+        200:
+          description: "Successfully created county_name_mapping"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+
+  /county_name_mapping:
+    get:
+      tags:
+        - County_name_mapping
+      summary: "Gets all current county names in the United States"
+      description: "Gets an array of county_name_mapping objects. This matches a fips_id with the county name."
+          
+      responses:
+        200:
+          description: "Successfully Retrieved all current county_name_mapping objects."
+          schema:
+            $ref: "#/definitions/CountyNameMappingResponse"
+
 
 
 definitions: 
@@ -317,9 +397,48 @@ definitions:
 #--------------------
 
 
-#-------------------Compare County List Response---------------
 
-  CompareCountyListResponse:
+#-------------------County_data Response---------------
+
+  CountyDataResponse:
+    type: array
+    items: 
+      type: object
+      properties:
+        info_date:
+          type: string
+          format: date
+          example: 2025-01-01
+        fips_id:
+          type: string
+          example: "12345"
+        median_listing_price:
+          type: float
+          example: 300500.0
+        active_listing_count:
+          type: integer
+          example: 123
+        active_listing_count_yy:
+          type: float
+          example: 0.123
+        median_days_on_market:
+          type: integer
+          example: 123
+        price_reduced_count:
+          type: integer
+          example: 12
+        pending_listing_count:
+          type: integer
+          example: 123
+
+       
+# -------------------
+
+
+
+#-------------------County Name Mapping Response---------------
+
+  CountyNameMappingResponse:
     type: array
     items: 
       type: object
@@ -332,5 +451,3 @@ definitions:
           example: "county_name"
        
 # -------------------
-
-#-------------------Add Compare_county---------------
