@@ -48,10 +48,7 @@ def create_user():
     db.session.add(new_user)
     db.session.commit()
 
-    return jsonify({
-        'message': 'Successfully created user',
-        'user': user_schema.dump(new_user)
-    })
+    return user_schema.jsonify(new_user), 201
 
 
 
@@ -99,10 +96,7 @@ def update_user():
         return jsonify({"error": "Email already taken."}), 400
 
     db.session.commit()
-    return jsonify({
-         'message': 'Successfully updated account',
-         'user': user_schema.dump(user)
-    }), 200
+    return user_schema.jsonify(existing), 200
 
 
 # Delete Profile

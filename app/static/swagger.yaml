@@ -74,7 +74,7 @@ paths:
 
       responses:
         201:
-          description: "Creation Successful"
+          description: "User creation Successful"
           schema:
             $ref: "#/definitions/UserResponse"
           examples:
