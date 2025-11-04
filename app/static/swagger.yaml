@@ -3,7 +3,7 @@ info:
   title: "Real Estate Helper API"
   description: "This is an API to help access United States real estate county data and compare patterns over the years"
   version: "1.0.0"
-host: "https://real-estate-helper-api.onrender.com" #"127.0.0.1:5000" 
+host: "real-estate-helper-api.onrender.com" #"127.0.0.1:5000" 
 schemes:
   - "https"
 consumes:
