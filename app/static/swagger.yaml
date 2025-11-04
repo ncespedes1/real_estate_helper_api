@@ -376,24 +376,6 @@ definitions:
         type: string
 
 
-  UsersResponse: 
-    type: array
-    items:
-      type: object
-      properties:
-        id:
-          type: integer
-        first_name:
-          type: string
-        last_name:
-          type: string
-        email:
-          type: string
-        password:
-          type: string
-        role:
-          type: string
-
 #--------------------
 
 
@@ -430,8 +412,7 @@ definitions:
         pending_listing_count:
           type: integer
           example: 123
-
-       
+ 
 # -------------------
 
 
