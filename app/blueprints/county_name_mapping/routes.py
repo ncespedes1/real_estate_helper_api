@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from . import county_name_mapping_bp
 import pandas as pd
 import io
-
+from sqlalchemy import select
 
 
 # Create County_name_mapping (multiple) by uploading csv file
@@ -20,13 +20,16 @@ def upload_county_name_mapping():
 
     if file:
         try:
-
+            existing_county_name_fips = db.session.scalars(select(County_name_mapping.fips_id)).all() #checking existing db
             dataframe = pd.read_csv(io.StringIO(file.stream.read().decode("UTF8")), sep=',', header=0, usecols=['county_fips', 'county_name'], dtype={'county_fips': str})
+            new_fips_added = set()
 
             for row in dataframe.itertuples(index=False):
                 new_county_name_mapping = County_name_mapping(fips_id= row.county_fips, county_name= row.county_name)
-                db.session.add(new_county_name_mapping)
-                print(f"Fips: {row.county_fips}, Name: {row.county_name}")
+                if new_county_name_mapping.fips_id not in existing_county_name_fips and new_county_name_mapping.fips_id not in new_fips_added:
+                    db.session.add(new_county_name_mapping)
+                    new_fips_added.add(new_county_name_mapping.fips_id)
+                    print(f"Fips: {row.county_fips}, Name: {row.county_name}")
 
             db.session.commit()
         

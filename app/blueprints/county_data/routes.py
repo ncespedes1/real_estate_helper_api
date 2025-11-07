@@ -56,6 +56,7 @@ def upload_county_data():
             db.session.commit()
 
         except Exception as e:
+            print(e)
             return jsonify(e.messages), 400
 
     return jsonify({
