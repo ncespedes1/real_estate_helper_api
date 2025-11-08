@@ -114,7 +114,7 @@ def delete_user():
 
 
 #Assign compared counties
-@users_bp.route('/assign_compare_county/<county_fips>', methods=['PUT'])
+@users_bp.route('/assign_compare_county/<county_fips>', methods=['POST'])
 @token_required
 def assign_compare_county(county_fips):
     user_id= request.user_id
