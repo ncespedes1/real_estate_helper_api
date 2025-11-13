@@ -86,10 +86,10 @@ def update_user():
     except ValidationError as e:
         return jsonify(e.messages), 400
     
+    data['password'] = generate_password_hash(data['password'])
+    
     for key, value in data.items():
         setattr(user, key, value)
-
-    data['password'] = generate_password_hash(data['password'])
 
     existing = db.session.query(Users).where(Users.email == data['email']).first()
     if existing and existing.id != user_id:
