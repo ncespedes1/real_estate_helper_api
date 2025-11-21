@@ -57,7 +57,7 @@ def upload_county_name_mapping():
 # View counties_mapping
 @county_name_mapping_bp.route('', methods=['GET'])
 def get_county_name_mappings():
-    county_name_mappings = db.session.query(County_name_mapping).all()
+    county_name_mappings = db.session.query(County_name_mapping).order_by(County_name_mapping.county_name.asc()).all()
     return county_name_mappings_schema.jsonify(county_name_mappings), 200
 
 
