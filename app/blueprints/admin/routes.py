@@ -15,4 +15,4 @@ def get_user():
     user = db.session.query(Users).where(Users.email==email).first()
     if user:
         return user_schema.jsonify(user), 200
-    return jsonify ({'error': 'No user found'}), 404
+    return jsonify ({'message': 'No user found'}), 404

@@ -217,6 +217,30 @@ paths:
                 message:
                   type: string
 
+  /admin/users:
+    get:
+      tags:
+        - Admin
+      summary: "Find user by email (admin only)"
+      description: "Allows an admin to search for a user by email address."
+      parameters:
+        - in: query
+          name: email
+          description: "Email of the user to look up"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "Successfully retrieved matching user."
+          schema:
+            $ref: "#/definitions/UserResponse"
+        404:
+          description: "User not found"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
 
 
   /county_data/upload:
