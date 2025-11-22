@@ -185,8 +185,7 @@ paths:
           name: county_fips
           description: "New compare_county information"
           required: true
-          schema:
-            $ref: "#/definitions/Compare_CountyInput"
+          type: string
         responses:
           200:
             description: "Successfully added a Compare_county"
@@ -277,7 +276,7 @@ paths:
           name: fips_id
           description: "County fips id"
           required: true
-          
+          type: string
       responses:
         200:
           description: "Successfully Retrieved all historical county_data for county matching the fips id."
