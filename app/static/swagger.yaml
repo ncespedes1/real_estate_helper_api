@@ -168,6 +168,8 @@ paths:
         - Compare_county
       summary: "Returns all counties assigned to User"
       description: "Endpoint to receive an array of counties assigned to User. Token is required to identify User."
+      security:
+        - bearerAuth: []
       responses:
         200:
           description: "Successfully Retrieved User's compare counties list"
@@ -180,6 +182,8 @@ paths:
           - Compare_county
         summary: "Adds a Compare_county to User's county compare list"
         description: "Endpoint to add a Compare_county object assigned to User. Token is required to identify User."
+        security:
+          - bearerAuth: []
         parameters:
         - in: path
           name: county_fips
@@ -201,6 +205,8 @@ paths:
           - Compare_county
         summary: "Removes a Compare_county from User's county compare list"
         description: "Removes a Compare_county object. Token is required to identify User. Requires a county_fips id to identify which compare_county to remove."
+        security:
+          - bearerAuth: [ ]
         parameters:
           - in: path
             name: county_fips
@@ -222,6 +228,8 @@ paths:
         - Admin
       summary: "Find user by email (admin only)"
       description: "Allows an admin to search for a user by email address."
+      security:
+        - bearerAuth: []
       parameters:
         - in: query
           name: email
@@ -233,6 +241,46 @@ paths:
           description: "Successfully retrieved matching user."
           schema:
             $ref: "#/definitions/UserResponse"
+        404:
+          description: "User not found"
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+
+  /admin/users/{user_id}:
+    put:
+      tags:
+        - Admin
+      summary: "Update any user (admin only)"
+      description: "Allows an admin to update any user's profile by user ID."
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: user_id
+          description: "ID of the user to update"
+          required: true
+          type: integer
+        - in: body
+          name: body
+          description: "Updated user fields"
+          required: true
+          schema:
+            $ref: "#/definitions/UserInput"
+      responses:
+        200:
+          description: "Successfully updated user."
+          schema:
+            $ref: "#/definitions/UserResponse"
+          examples:
+            application/json:
+              id: 1
+              first_name: "John"
+              last_name: "Updated"
+              email: "john@example.com"
+              role: "paid_user"
         404:
           description: "User not found"
           schema:
